@@ -1,7 +1,6 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
-import * as dat from 'dat.gui'
-
+import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader'
 // 创建场景
 const scene = new THREE.Scene();
 
@@ -19,52 +18,37 @@ camera.position.set(0, 0, 10)
 // 相机添加到场景中
 scene.add(camera)
 
+const event = {
+  onLoad: () => {
+    console.log('图片加载完成');
+  },
+  onProgress: (url, loaded, total) => {
+    console.log('图片加载进度', url, loaded, total);
+  }
+}
 
-// 导入纹理
-const textureLoader = new THREE.TextureLoader();
-const myTexture = textureLoader.load('./texture/door.jpeg')
-// 透明纹理
-const alphaTexture = textureLoader.load('./texture/alphaTexture.png')
-console.log('myTexture', myTexture);
-// 纹理属性
-// myTexture.offset.set(1, 1);
-// myTexture.rotation = Math.PI / 4;
-myTexture.center.set(1, 1);
-// myTexture.repeat.set(2, 4);
-myTexture.wrapS = THREE.RepeatWrapping;
-myTexture.wrapT = THREE.RepeatWrapping;
-// 纹理显示设置
-myTexture.minFilter = THREE.NearestFilter;
-myTexture.magFilter = THREE.NearestFilter;
-myTexture.magFilter = THREE.LinearFilter;
-myTexture.magFilter = THREE.LinearFilter;
+// 设置加载管理器
+const loadingManager = new THREE.LoadingManager(
+  event.onLoad, event.onProgress
+)
 
-
-// 添加物体
-const cubeGeometry = new THREE.BoxGeometry(2, 2, 2);
-// 材质
-const basicMaterial = new THREE.MeshBasicMaterial({
-  color: '#ffff00',
-  map: myTexture,
-  alphaMap: alphaTexture,
-  transparent: true,
-  side: THREE.DoubleSide,
-  opacity: 0.5
+// 加载hdr环境图 ------ 有点意思
+const rgbeLoader = new RGBELoader();
+rgbeLoader.loadAsync('./texture/hdr2.hdr').then((texture) => {
+  texture.mapping = THREE.EquirectangularReflectionMapping
+  scene.background = texture
+  scene.environment = texture
 })
-const cube = new THREE.Mesh(cubeGeometry, basicMaterial);
+
+const sphereGeometry = new THREE.SphereGeometry(3, 40, 40);
+const material = new THREE.MeshStandardMaterial({
+  roughness: 0,
+  metalness: 0.8
+});
+const cube = new THREE.Mesh(sphereGeometry, material);
 scene.add(cube)
 
-// 添加平面
-const plane = new THREE.Mesh(
-  new THREE.PlaneGeometry(2, 2),
-  basicMaterial
-)
-plane.position.set(3, 0, 0)
-scene.add(plane)
 
-// 添加坐标轴辅助器
-const axesHelper = new THREE.AxesHelper(5);
-scene.add(axesHelper)
 
 // 初始化渲染器
 const renderer = new THREE.WebGL1Renderer()
