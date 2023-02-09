@@ -1,6 +1,8 @@
+import { GUI } from 'dat.gui';
 import * as THREE from 'three'
+import { Clock, MeshBasicMaterial } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
+import { Water } from 'three/examples/jsm/objects/Water2'
 /** -----------------------------通用配置start-------------------- */
 // 创建场景
 const scene = new THREE.Scene();
@@ -10,11 +12,11 @@ const camera = new THREE.PerspectiveCamera(
   75,
   window.innerWidth / window.innerHeight,
   0.1,
-  1000
+  10000
 )
 
 // 设置相机位置
-camera.position.set(0, 0, 10)
+camera.position.set(-50, 50, 130)
 
 // 相机添加到场景中
 scene.add(camera)
@@ -81,17 +83,38 @@ window.addEventListener('dblclick', () => {
 
 /** -----------------------------通用配置end-------------------- */
 
-const loader = new THREE.TextureLoader();
-const bgTexture = loader.load('./texture/hdr2.jpg');
-bgTexture.mapping = THREE.EquirectangularReflectionMapping;
+// 添加坐标轴辅助器
+const axesHelper = new THREE.AxesHelper(1000);
+scene.add(axesHelper)
+// 添加平面
+// const planeGeometry = new THREE.PlaneGeometry(100, 100)
+// const planeMaterial = new THREE.MeshBasicMaterial({
+//   color: 0xffffff
+// })
+// const plane = new THREE.Mesh(planeGeometry, planeMaterial)
+// scene.add(plane);
 
-scene.background = bgTexture;
-scene.environment = bgTexture;
-
-// 加载模型 todo 文件有问题还加载不出来
-const gltfLoader = new GLTFLoader();
-gltfLoader.load('./gltf/Duck.gltf', (gltf) => {
-  const model = gltf.scene.children[0];
-  // model.scale.set(0.1, 0.1, 0.1);
-  scene.add(model)
+// 创建巨大的天空球
+const skyGeometry = new THREE.SphereGeometry(1000, 60, 60);
+const texture = new THREE.TextureLoader().load('./texture/sky.jpg');
+const skyMaterial = new THREE.MeshBasicMaterial({
+  map: texture,
+  side: THREE.DoubleSide, // 默认是单面
 })
+// skyGeometry.scale(1, 1, -1) // 展示内侧面
+const sky = new THREE.Mesh(skyGeometry, skyMaterial)
+sky.position.set(0, 0, 0)
+scene.add(sky)
+
+// 创建水面
+const waterGeometry = new THREE.CircleGeometry(300, 64)
+const water = new Water(waterGeometry, {
+  textureWidth: 1024,
+  textureHeight: 1024,
+  color: 0xeeeeff,
+  flowDirection: new THREE.Vector2(10, 10),
+  scale: 1
+})
+water.position.set(0, 0, 0)
+water.rotation.x = -Math.PI / 2
+scene.add(water)

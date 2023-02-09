@@ -1,6 +1,7 @@
+import { GUI } from 'dat.gui';
 import * as THREE from 'three'
+import { Clock, MeshBasicMaterial } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 /** -----------------------------通用配置start-------------------- */
 // 创建场景
 const scene = new THREE.Scene();
@@ -14,7 +15,7 @@ const camera = new THREE.PerspectiveCamera(
 )
 
 // 设置相机位置
-camera.position.set(0, 0, 10)
+camera.position.set(-50, 50, 130)
 
 // 相机添加到场景中
 scene.add(camera)
@@ -80,18 +81,3 @@ window.addEventListener('dblclick', () => {
 })
 
 /** -----------------------------通用配置end-------------------- */
-
-const loader = new THREE.TextureLoader();
-const bgTexture = loader.load('./texture/hdr2.jpg');
-bgTexture.mapping = THREE.EquirectangularReflectionMapping;
-
-scene.background = bgTexture;
-scene.environment = bgTexture;
-
-// 加载模型 todo 文件有问题还加载不出来
-const gltfLoader = new GLTFLoader();
-gltfLoader.load('./gltf/Duck.gltf', (gltf) => {
-  const model = gltf.scene.children[0];
-  // model.scale.set(0.1, 0.1, 0.1);
-  scene.add(model)
-})
